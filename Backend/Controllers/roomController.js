@@ -10,17 +10,18 @@ const createRoom = async (req, res) => {
         if (existingRoom) {
             return res.status(400).json({ message: 'Room already exists' });
         }
-
+        
         const newRoom = new Room({
             roomNumber,
             type,
             floorId,
-            numberOfBeds
+            totalBedOccupancy : numberOfBeds
         });
 
         await newRoom.save();
         res.status(201).json({ message: 'Room created successfully', room: newRoom });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Error creating room', error: error.message });
     }
 };
@@ -28,7 +29,7 @@ const createRoom = async (req, res) => {
 // Get all rooms
 const getAllRooms = async (req, res) => {
     try {
-        const rooms = await Room.find();
+        const rooms = await Room.find().populate('floorId', 'floorNumber');
         res.status(200).json({ rooms });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching rooms', error: error.message });

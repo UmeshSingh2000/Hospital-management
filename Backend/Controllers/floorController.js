@@ -1,15 +1,17 @@
 const Floor = require('../Database/Model/floorSchema')
 const createFloor = async (req, res) => {
     try {
-        const { floorNumber, description } = req.body;
+        const { floorNumber } = req.body;
 
-        if (!floorNumber || !description) {
-            return res.status(400).json({ message: 'Floor number and description are required' });
+        if (!floorNumber) {
+            return res.status(400).json({ message: 'Floor number is required' });
         }
-
+        const existingFloor = await Floor.findOne({ floorNumber });
+        if (existingFloor) {
+            return res.status(400).json({ message: 'Floor already exists' });
+        }
         const newFloor = new Floor({
-            floorNumber,
-            description
+            floorNumber
         });
 
         await newFloor.save();
@@ -18,6 +20,18 @@ const createFloor = async (req, res) => {
         res.status(500).json({ message: 'Error creating floor', error: error.message });
     }
 }
+
+const getAllFloors = async (req, res) => {
+    try {
+        const floors = await Floor.find();
+        res.status(200).json({ floors });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching floors', error: error.message });
+    }
+}
+
+
 module.exports = {
-    createFloor
+    createFloor,
+    getAllFloors
 };

@@ -1,39 +1,73 @@
 const Bed = require('../Database/Model/bedSchema');
-
+const Room = require('../Database/Model/roomSchema');
 const createBed = async (req, res) => {
+  try {
+    const { bedNumber, roomId } = req.body;
+
+    // Validate input
+    if (!bedNumber || !roomId) {
+      return res.status(400).json({ message: 'Bed number and Room ID are required.' });
+    }
+
+    // Check if room exists
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found.' });
+    }
+
+    // Check if room is full
+    if (room.numberOfBeds >= room.totalBedOccupancy) {
+      return res.status(400).json({ message: 'Cannot add more beds, room is full.' });
+    }
+
+    // Check if the same bed number exists in this room
+    const existingBed = await Bed.findOne({ bedNumber, roomId });
+    if (existingBed) {
+      return res.status(409).json({ message: 'Bed number already exists in this room.' });
+    }
+
+    // Create and save new bed
+    const newBed = new Bed({ bedNumber, roomId });
+    await newBed.save();
+
+    // Update room's bed count
+    room.numberOfBeds += 1;
+    if (room.numberOfBeds === room.totalBedOccupancy) {
+      room.isFull = true;
+    }
+    await room.save();
+
+    return res.status(201).json({
+      message: 'Bed created successfully',
+      bed: newBed
+    });
+
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'Bed number already exists.' });
+    }
+
+    res.status(500).json({ message: 'Error creating bed', error: error.message });
+  }
+};
+
+const getAllBeds = async (req, res) => {
     try {
-        const { bedNumber, roomId } = req.body;
-
-        // Validate input
-        if (!bedNumber || !roomId) {
-            return res.status(400).json({ message: 'Bed number and Room ID are required.' });
-        }
-
-
-        // Create a new bed
-        const newBed = new Bed({
-            bedNumber,
-            roomId
-        });
-
-        // Save to DB
-        await newBed.save();
-
-        res.status(201).json({
-            message: 'Bed created successfully',
-            bed: newBed
-        });
-
+        const beds = await Bed.find().populate({
+            path : 'roomId',
+            select : 'roomNumber type floorId',
+            populate: {
+                path : 'floorId',
+                select : 'floorNumber'
+            }
+        }); // Populate room details
+        res.status(200).json(beds);
     } catch (error) {
-        // Handle duplicate key error for bedNumber
-        if (error.code === 11000) {
-            return res.status(409).json({ message: 'Bed number already exists.' });
-        }
-
-        res.status(500).json({ message: 'Error creating bed', error: error.message });
+        res.status(500).json({ message: 'Error fetching beds', error: error.message });
     }
 };
 
 module.exports = {
-    createBed
+    createBed,
+    getAllBeds
 };

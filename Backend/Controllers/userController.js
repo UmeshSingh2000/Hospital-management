@@ -1,5 +1,5 @@
 const User = require("../Database/Model/userSchema");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key'; // Ideally from env
 

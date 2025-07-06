@@ -6,7 +6,6 @@ const bedSchema = new Schema(
     bedNumber: {
       type: String,
       required: [true, 'Bed number is required'],
-      unique: true,
       trim: true,
       minlength: [1, 'Bed number must be at least 1 character'],
       maxlength: [10, 'Bed number must be less than 10 characters']
