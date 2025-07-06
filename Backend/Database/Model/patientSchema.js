@@ -31,13 +31,6 @@ const patientSchema = new Schema(
       },
       required: [true, 'Contact number is required']
     },
-    email: {
-      type: String,
-      lowercase: true,
-      trim: true,
-      match: [/\S+@\S+\.\S+/, 'Email is invalid'],
-      required: [false, 'Email is optional']
-    },
     address: {
       type: String,
       trim: true
@@ -53,7 +46,7 @@ const patientSchema = new Schema(
     doctorAssigned: {
       type: Schema.Types.ObjectId,
       ref: 'User', // Assuming User model is used for doctors
-      required: [true, 'Doctor assigned is required']
+      // required: [true, 'Doctor assigned is required']
     },
   },
   {
@@ -62,8 +55,8 @@ const patientSchema = new Schema(
 );
 
 // Optional: Indexing for faster search on name or contact
-patientSchema.index({ name: 1 });
-patientSchema.index({ contactNumber: 1 });
+// patientSchema.index({ name: 1 });
+// patientSchema.index({ contactNumber: 1 });
 
 const Patient = mongoose.model('Patient', patientSchema);
 

@@ -14,7 +14,7 @@ const roomSchema = new Schema(
             enum: ['General', 'Semi-Private', 'Private', 'ICU', 'Operation Theater'],
             required: [true, 'Room type is required']
         },
-        floor: {
+        floorId: {
             type: Schema.Types.ObjectId,
             ref: 'Floor', // Assuming Floor model is used for floors
             required: [true, 'Floor is required']
@@ -35,8 +35,8 @@ const roomSchema = new Schema(
     }
 );
 
-// Optional: Indexes
-roomSchema.index({ roomNumber: 1 });
+// // Optional: Indexes
+// roomSchema.index({ roomNumber: 1 });
 
 const Room = mongoose.model('Room', roomSchema);
 module.exports = Room;

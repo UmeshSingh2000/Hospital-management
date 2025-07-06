@@ -1,12 +1,12 @@
 const Room = require('../Database/Model/roomSchema');
 
 // Create a new room
+// admin
 const createRoom = async (req, res) => {
     try {
-        //floor is id
-        const { roomNumber, type, floor, numberOfBeds } = req.body;
+        const { roomNumber, type, floorId, numberOfBeds } = req.body;
 
-        const existingRoom = await Room.findOne({ roomNumber, floor });
+        const existingRoom = await Room.findOne({ roomNumber, floorId });
         if (existingRoom) {
             return res.status(400).json({ message: 'Room already exists' });
         }
@@ -14,7 +14,7 @@ const createRoom = async (req, res) => {
         const newRoom = new Room({
             roomNumber,
             type,
-            floor,
+            floorId,
             numberOfBeds
         });
 

@@ -42,8 +42,8 @@ const bedSchema = new Schema(
 );
 
 // Optional: Indexes for better search performance
-bedSchema.index({ bedNumber: 1 });
-bedSchema.index({ roomId: 1 });
+// bedSchema.index({ bedNumber: 1 });
+// bedSchema.index({ roomId: 1 });
 
 const Bed = mongoose.model('Bed', bedSchema);
 module.exports = Bed;

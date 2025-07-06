@@ -16,6 +16,6 @@ const floorSchema = new Schema({
     timestamps: true
 });
 // Optional: Indexes for better search performance
-floorSchema.index({ floorNumber: 1 });
+// floorSchema.index({ floorNumber: 1 });
 const Floor = mongoose.model('Floor', floorSchema);
 module.exports = Floor;
