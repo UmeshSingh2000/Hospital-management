@@ -2,12 +2,15 @@ import { useState } from 'react';
 import FloorForm from '../Component/FloorForm';
 import RoomForm from '../Component/RoomForm';
 import BedForm from '../Component/BedForm';
-import { useNavigate } from 'react-router-dom'; // if using react-router
+import Users from '../Component/Users'; // make sure this component exists
+import { useNavigate } from 'react-router-dom';
+import CreateUser from '../Component/CreateUser';
 
 const AdminDashboard = () => {
   const [view, setView] = useState('floor');
   const [infrastructureOpen, setInfrastructureOpen] = useState(true);
-  const navigate = useNavigate(); // for redirection on logout
+  const [usersOpen, setUsersOpen] = useState(false);
+  const navigate = useNavigate();
 
   const isActive = (menu) =>
     view === menu
@@ -17,7 +20,7 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    navigate('/'); // Redirect to login page
+    navigate('/');
   };
 
   return (
@@ -27,8 +30,8 @@ const AdminDashboard = () => {
         <div>
           <h2 className="text-2xl font-bold text-blue-700 mb-6 px-2">🛠 Admin Panel</h2>
 
-          {/* Manage Infrastructure Menu */}
-          <div>
+          {/* Manage Infrastructure */}
+          <div className="mb-4">
             <button
               onClick={() => setInfrastructureOpen(!infrastructureOpen)}
               className="w-full flex justify-between items-center text-left px-4 py-2 rounded-md bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold transition"
@@ -60,9 +63,38 @@ const AdminDashboard = () => {
               </div>
             )}
           </div>
+
+          {/* Manage Users */}
+          <div>
+            <button
+              onClick={() => setUsersOpen(!usersOpen)}
+              className="w-full flex justify-between items-center text-left px-4 py-2 rounded-md bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold transition"
+            >
+              <span>Manage Users</span>
+              <span className="text-sm">{usersOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {usersOpen && (
+              <div className="mt-3 ml-2 space-y-2">
+                <button
+                  onClick={() => setView('users')}
+                  className={`w-full text-left px-4 py-2 rounded-md transition ${isActive('users')}`}
+                >
+                  👥 View All Users
+                </button>
+                <button
+                  onClick={() => setView('createUser')}
+                  className={`w-full text-left px-4 py-2 rounded-md transition ${isActive('createUser')}`}
+                >
+                  ➕ Create User
+                </button>
+                {/* You can add more user-related actions here */}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Logout Button */}
+        {/* Logout */}
         <div className="mt-8">
           <button
             onClick={handleLogout}
@@ -79,6 +111,8 @@ const AdminDashboard = () => {
           {view === 'floor' && <FloorForm />}
           {view === 'room' && <RoomForm />}
           {view === 'bed' && <BedForm />}
+          {view === 'users' && <Users />}
+          {view ==='createUser' && <CreateUser/>}
         </div>
       </main>
     </div>
