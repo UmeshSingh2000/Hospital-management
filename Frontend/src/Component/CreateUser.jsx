@@ -86,7 +86,6 @@ const CreateUser = () => {
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option>Select Role</option>
-            <option value="admin">Admin</option>
             <option value="doctor">Doctor</option>
             <option value="nurse">Nurse</option>
             <option value="receptionist">Receptionist</option>
