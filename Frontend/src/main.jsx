@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './Component/Login'
 import AdminDashboard from './Pages/AdminDashboard'
 import { Toaster } from 'react-hot-toast'
+import ReceptionistDashboard from './Pages/ReceptionistDashboard'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
@@ -11,6 +12,7 @@ createRoot(document.getElementById('root')).render(
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path='/admin/dashboard' element={<AdminDashboard />} />
+      <Route path='/receptionist/dashboard' element={<ReceptionistDashboard />} />
     </Routes>
   </BrowserRouter>
 )

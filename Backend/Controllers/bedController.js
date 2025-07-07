@@ -52,22 +52,56 @@ const createBed = async (req, res) => {
 };
 
 const getAllBeds = async (req, res) => {
-    try {
-        const beds = await Bed.find().populate({
-            path : 'roomId',
-            select : 'roomNumber type floorId',
-            populate: {
-                path : 'floorId',
-                select : 'floorNumber'
-            }
-        }); // Populate room details
-        res.status(200).json(beds);
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching beds', error: error.message });
-    }
+  try {
+    const beds = await Bed.find().populate({
+      path: 'roomId',
+      select: 'roomNumber type floorId',
+      populate: {
+        path: 'floorId',
+        select: 'floorNumber'
+      }
+    }); // Populate room details
+    res.status(200).json(beds);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching beds', error: error.message });
+  }
+};
+
+const getAvailableBeds = async (req, res) => {
+  try {
+    const beds = await Bed.find({ isOccupied: false }).populate({
+      path: 'roomId',
+      select: 'roomNumber type floorId',
+      populate: {
+        path: 'floorId',
+        select: 'floorNumber'
+      }
+    });
+    res.status(200).json(beds);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching available beds', error: error.message });
+  }
+};
+
+const getOccupiedBeds = async (req, res) => {
+  try {
+    const beds = await Bed.find({ isOccupied: true }).populate({
+      path: 'roomId',
+      select: 'roomNumber type floorId',
+      populate: {
+        path: 'floorId',
+        select: 'floorNumber'
+      }
+    });
+    res.status(200).json(beds);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching occupied beds', error: error.message });
+  }
 };
 
 module.exports = {
-    createBed,
-    getAllBeds
+  createBed,
+  getAllBeds,
+  getAvailableBeds,
+  getOccupiedBeds
 };

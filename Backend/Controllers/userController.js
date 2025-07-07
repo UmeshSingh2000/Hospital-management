@@ -78,7 +78,8 @@ const loginUser = async (req, res) => {
 // Get all users
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-password'); // Don't return passwords
+        const { userId } = req.user; // Get user ID from token
+        const users = await User.find({ _id: { $ne: userId } }).select('-password'); // Don't return passwords
         res.status(200).json({ users });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching users', error: error.message });

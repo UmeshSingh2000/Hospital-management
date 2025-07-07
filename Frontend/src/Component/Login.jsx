@@ -27,8 +27,8 @@ const Login = () => {
             // redirect based on role
             if (response.data.role === 'admin') {
                 navigate('/admin/dashboard');
-            } else {
-                navigate('/dashboard');
+            } else if(response.data.role === 'receptionist') {
+                navigate('/receptionist/dashboard');
             }
         } catch (error) {
             setErrorMsg(error.response?.data?.message || 'Something went wrong');

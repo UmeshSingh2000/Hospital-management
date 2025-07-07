@@ -7,7 +7,7 @@ const CreateUser = () => {
     name: '',
     email: '',
     password: '',
-    role: 'user',
+    role: '',
   });
 
   const handleChange = (e) => {
@@ -18,7 +18,7 @@ const CreateUser = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/register`,
+        `${import.meta.env.VITE_BACKEND_URL}/admin/registerUser`,
         formData,
         {
           headers: {
