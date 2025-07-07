@@ -35,13 +35,17 @@ const patientSchema = new Schema(
       type: String,
       trim: true
     },
-    medicalHistory: {
-      type: [String], // Array of strings for simplicity
-      default: []
-    },
+    // medicalHistory: {
+    //   type: [String], // Array of strings for simplicity
+    //   default: []
+    // },
     isActive: {
       type: Boolean,
       default: true
+    },
+    isAssignedBed:{
+      type: Boolean,
+      default: false // Indicates if the patient has been assigned a bed
     },
     doctorAssigned: {
       type: Schema.Types.ObjectId,

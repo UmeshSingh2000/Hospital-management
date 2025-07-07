@@ -1,5 +1,6 @@
 const Bed = require('../Database/Model/bedSchema');
 const Room = require('../Database/Model/roomSchema');
+const Patient = require('../Database/Model/patientSchema');
 const createBed = async (req, res) => {
   try {
     const { bedNumber, roomId } = req.body;
@@ -92,10 +93,54 @@ const getOccupiedBeds = async (req, res) => {
         path: 'floorId',
         select: 'floorNumber'
       }
-    });
+    })
+      .populate('patientId', 'name age contactNumber');
     res.status(200).json(beds);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching occupied beds', error: error.message });
+  }
+};
+
+const assignedBedToPatient = async (req, res) => {
+  try {
+    const { bedId, patientId } = req.body;
+
+    // Validate input
+    if (!bedId || !patientId) {
+      return res.status(400).json({ message: 'Bed ID and Patient ID are required.' });
+    }
+    const isPatient = await Patient.findById(patientId);
+    if (!isPatient) {
+      return res.status(404).json({ message: 'Patient not found.' });
+    }
+    if (isPatient.isAssignedBed) {
+      return res.status(400).json({ message: 'Patient already has an assigned bed.' });
+    }
+    // Find the bed
+    const bed = await Bed.findById(bedId);
+    if (!bed) {
+      return res.status(404).json({ message: 'Bed not found.' });
+    }
+
+    // Check if the bed is already occupied
+    if (bed.isOccupied) {
+      return res.status(400).json({ message: 'Bed is already occupied.' });
+    }
+
+    // Assign the bed to the patient
+    bed.isOccupied = true;
+    bed.patientId = patientId;
+    isPatient.isAssignedBed = true; 
+    await bed.save();
+    await isPatient.save();
+
+    return res.status(200).json({
+      message: 'Bed assigned to patient successfully',
+      bed
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error assigning bed', error: error.message });
   }
 };
 
@@ -103,5 +148,6 @@ module.exports = {
   createBed,
   getAllBeds,
   getAvailableBeds,
-  getOccupiedBeds
+  getOccupiedBeds,
+  assignedBedToPatient
 };

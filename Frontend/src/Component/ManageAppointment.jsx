@@ -31,7 +31,6 @@ const ManageAppointment = () => {
         gender: '',
         contactNumber: '',
         address: '',
-        medicalHistory: ''
     });
 
     const [showForm, setShowForm] = useState(false);
@@ -72,7 +71,6 @@ const ManageAppointment = () => {
                     gender: '',
                     contactNumber: '',
                     address: '',
-                    medicalHistory: ''
                 });
                 setShowForm(false);
                 fetchPatients(); // Refresh the patient list
@@ -147,13 +145,13 @@ const ManageAppointment = () => {
                             className="w-full border px-4 py-2 rounded-md"
                         />
 
-                        <textarea
+                        {/* <textarea
                             name="medicalHistory"
                             value={formData.medicalHistory}
                             onChange={handleChange}
                             placeholder="Medical History (optional)"
                             className="w-full border px-4 py-2 rounded-md"
-                        />
+                        /> */}
 
                         <button
                             type="submit"

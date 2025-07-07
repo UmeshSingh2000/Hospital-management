@@ -2,7 +2,7 @@ const Patient = require('../Database/Model/patientSchema')
 // done by receptionist
 const createNewPatient = async (req, res) => {
     try {
-        const { name, age, gender, contactNumber, address, medicalHistory } = req.body
+        const { name, age, gender, contactNumber, address } = req.body
         if (!name || !age || !gender || !contactNumber || !address) {
             return res.status(400).json({ message: 'All fields are required' });
         }
@@ -12,7 +12,6 @@ const createNewPatient = async (req, res) => {
             gender,
             contactNumber,
             address,
-            medicalHistory
         });
         const savedPatient = await newPatient.save();
         res.status(201).json({ message: 'Patient created successfully', patient: savedPatient });
@@ -31,7 +30,17 @@ const getAllPatients = async (req, res) => {
     }
 }
 
+const getUnOccupiedPatients = async (req,res)=>{
+    try {
+        const patients = await Patient.find({ isAssignedBed: false })
+        res.status(200).json(patients);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching patients', error: error.message });
+    }
+}
+
 module.exports = {
     createNewPatient,
-    getAllPatients
+    getAllPatients,
+    getUnOccupiedPatients
 }

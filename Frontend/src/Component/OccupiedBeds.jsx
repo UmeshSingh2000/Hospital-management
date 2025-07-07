@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BedDouble, Building2, Home, BadgeInfo } from 'lucide-react';
+import PatientDetailsModal from './PatientDetailsModal'; // 👈 import modal
 
 const OccupiedBeds = () => {
   const [beds, setBeds] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   const fetchOccupiedBeds = async () => {
     try {
@@ -21,6 +24,11 @@ const OccupiedBeds = () => {
     }
   };
 
+  const handleShowPatient = (patient) => {
+    setSelectedPatient(patient);
+    setModalOpen(true);
+  };
+
   useEffect(() => {
     fetchOccupiedBeds();
   }, []);
@@ -30,6 +38,13 @@ const OccupiedBeds = () => {
   return (
     <div>
       <h2 className="text-2xl font-bold text-red-700 mb-6">🚫 Occupied Beds</h2>
+
+      <PatientDetailsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        patient={selectedPatient}
+      />
+
       {beds.length === 0 ? (
         <p className="text-gray-500">No occupied beds found.</p>
       ) : (
@@ -58,6 +73,15 @@ const OccupiedBeds = () => {
                 <Building2 className="w-4 h-4 text-purple-500" />
                 Floor: {bed.roomId.floorId.floorNumber}
               </div>
+
+              {bed.patientId && (
+                <button
+                  className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  onClick={() => handleShowPatient(bed.patientId)}
+                >
+                  Show Patient
+                </button>
+              )}
             </li>
           ))}
         </ul>
