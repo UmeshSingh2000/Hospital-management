@@ -94,7 +94,14 @@ const getOccupiedBeds = async (req, res) => {
         select: 'floorNumber'
       }
     })
-      .populate('patientId', 'name age contactNumber');
+      .populate({
+        path: 'patientId',
+        select: 'name age contactNumber',
+        populate: {
+          path: 'doctorAssigned',
+          select: 'name email'
+        }
+      })
     res.status(200).json(beds);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching occupied beds', error: error.message });
@@ -130,7 +137,12 @@ const assignedBedToPatient = async (req, res) => {
     // Assign the bed to the patient
     bed.isOccupied = true;
     bed.patientId = patientId;
-    isPatient.isAssignedBed = true; 
+    isPatient.isAssignedBed = true;
+    bed.occupancyHistory.push({
+      patient: patientId,
+      from: new Date(),
+      to: null // To be updated when the bed is cleared
+    });
     await bed.save();
     await isPatient.save();
 
@@ -144,10 +156,54 @@ const assignedBedToPatient = async (req, res) => {
   }
 };
 
+const clearBed = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Bed ID is required.' });
+    }
+
+    const bed = await Bed.findById(id);
+    if (!bed) {
+      return res.status(404).json({ message: 'Bed not found.' });
+    }
+
+    if (!bed.isOccupied) {
+      return res.status(400).json({ message: 'Bed is not occupied.' });
+    }
+
+    // Find the patient linked to the bed
+    const patient = await Patient.findById(bed.patientId);
+    if (patient) {
+      patient.isAssignedBed = false;
+      await patient.save();
+    }
+
+    bed.isOccupied = false;
+    bed.patientId = null;
+
+    // Update occupancy history
+    const lastOccupancy = bed.occupancyHistory[bed.occupancyHistory.length - 1];
+    if (lastOccupancy && !lastOccupancy.to) {
+      lastOccupancy.to = new Date();
+    }
+
+    await bed.save();
+
+    return res.status(200).json({ message: 'Bed cleared successfully' });
+
+  } catch (error) {
+    return res.status(500).json({ message: 'Error clearing bed', error: error.message });
+  }
+};
+
+
 module.exports = {
   createBed,
   getAllBeds,
   getAvailableBeds,
   getOccupiedBeds,
-  assignedBedToPatient
+  assignedBedToPatient,
+  clearBed
 };

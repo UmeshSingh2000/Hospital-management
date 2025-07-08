@@ -30,7 +30,7 @@ const getAllPatients = async (req, res) => {
     }
 }
 
-const getUnOccupiedPatients = async (req,res)=>{
+const getUnOccupiedPatients = async (req, res) => {
     try {
         const patients = await Patient.find({ isAssignedBed: false })
         res.status(200).json(patients);
@@ -39,8 +39,31 @@ const getUnOccupiedPatients = async (req,res)=>{
     }
 }
 
+const assigDoctorToPatient = async (req, res) => {
+    try {
+        const { id } = req.params //patient id
+        const { doctorId } = req.body; //doctor id
+        if (!doctorId) {
+            return res.status(400).json({ message: 'Doctor ID is required' });
+        }
+        const patient = await Patient.findById(id);
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+        if (patient.doctorAssigned) {
+            return res.status(400).json({ message: 'Doctor already assigned to this patient' });
+        }
+        patient.doctorAssigned = doctorId;
+        await patient.save();
+        res.status(200).json({ message: 'Doctor assigned to patient successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error assigning doctor to patient', error: error.message });
+    }
+}
+
 module.exports = {
     createNewPatient,
     getAllPatients,
-    getUnOccupiedPatients
+    getUnOccupiedPatients,
+    assigDoctorToPatient
 }

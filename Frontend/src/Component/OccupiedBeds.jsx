@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BedDouble, Building2, Home, BadgeInfo } from 'lucide-react';
-import PatientDetailsModal from './PatientDetailsModal'; // 👈 import modal
+import toast from 'react-hot-toast';
+import PatientDetailsModal from './PatientDetailsModal';
 
 const OccupiedBeds = () => {
   const [beds, setBeds] = useState([]);
@@ -13,8 +14,8 @@ const OccupiedBeds = () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/getOccupiedBeds`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       setBeds(res.data || []);
     } catch (error) {
@@ -27,6 +28,28 @@ const OccupiedBeds = () => {
   const handleShowPatient = (patient) => {
     setSelectedPatient(patient);
     setModalOpen(true);
+  };
+
+  const handleClearBed = async (bedId) => {
+    try {
+      const confirmClear = window.confirm('Are you sure you want to clear this bed?');
+      if (!confirmClear) return;
+
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/user/clearBed/${bedId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      toast.success('Bed cleared successfully');
+      fetchOccupiedBeds(); // refresh the list
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to clear bed');
+    }
   };
 
   useEffect(() => {
@@ -75,12 +98,20 @@ const OccupiedBeds = () => {
               </div>
 
               {bed.patientId && (
-                <button
-                  className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
-                  onClick={() => handleShowPatient(bed.patientId)}
-                >
-                  Show Patient
-                </button>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                    onClick={() => handleShowPatient(bed.patientId)}
+                  >
+                    Show Patient
+                  </button>
+                  <button
+                    className="px-3 py-1 bg-gray-700 text-white text-sm rounded hover:bg-gray-800"
+                    onClick={() => handleClearBed(bed._id)}
+                  >
+                    Clear Bed
+                  </button>
+                </div>
               )}
             </li>
           ))}
