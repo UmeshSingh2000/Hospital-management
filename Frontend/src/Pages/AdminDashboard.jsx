@@ -2,14 +2,16 @@ import { useState } from 'react';
 import FloorForm from '../Component/FloorForm';
 import RoomForm from '../Component/RoomForm';
 import BedForm from '../Component/BedForm';
-import Users from '../Component/Users'; // make sure this component exists
+import Users from '../Component/Users';
 import { useNavigate } from 'react-router-dom';
 import CreateUser from '../Component/CreateUser';
+import { Menu } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [view, setView] = useState('floor');
   const [infrastructureOpen, setInfrastructureOpen] = useState(true);
   const [usersOpen, setUsersOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const isActive = (menu) =>
@@ -24,11 +26,20 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      {/* Top bar for mobile */}
+      <div className="md:hidden bg-white shadow-sm px-4 py-3 flex justify-between items-center border-b border-gray-200">
+        <h2 className="text-xl font-bold text-blue-700">🛠 Admin Panel</h2>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <Menu className="text-blue-700" />
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-gray-200 shadow-sm p-4 sticky top-0 h-screen flex flex-col justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-blue-700 mb-6 px-2">🛠 Admin Panel</h2>
+      <aside className={`md:block ${sidebarOpen ? 'block' : 'hidden'} w-full md:w-72 bg-white border-r border-gray-200 shadow-sm p-4 sticky top-0 h-screen md:h-auto flex flex-col justify-between z-10`}>
+        <div className="overflow-y-auto">
+          {/* Title for desktop */}
+          <h2 className="hidden md:block text-2xl font-bold text-blue-700 mb-6 px-2">🛠 Admin Panel</h2>
 
           {/* Manage Infrastructure */}
           <div className="mb-4">
@@ -88,14 +99,13 @@ const AdminDashboard = () => {
                 >
                   ➕ Create User
                 </button>
-                {/* You can add more user-related actions here */}
               </div>
             )}
           </div>
         </div>
 
         {/* Logout */}
-        <div className="mt-8">
+        <div className="mt-6">
           <button
             onClick={handleLogout}
             className="w-full px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md font-medium transition"
@@ -106,13 +116,13 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-10 bg-gray-100 overflow-y-auto">
-        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+      <main className="flex-1 p-4 md:p-10 bg-gray-100 overflow-y-auto">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-md border border-gray-200">
           {view === 'floor' && <FloorForm />}
           {view === 'room' && <RoomForm />}
           {view === 'bed' && <BedForm />}
           {view === 'users' && <Users />}
-          {view ==='createUser' && <CreateUser/>}
+          {view === 'createUser' && <CreateUser />}
         </div>
       </main>
     </div>

@@ -23,7 +23,7 @@ const createNewPatient = async (req, res) => {
 
 const getAllPatients = async (req, res) => {
     try {
-        const patients = await Patient.find().populate('doctorAssigned', 'name email');;
+        const patients = await Patient.find().populate('doctorAssigned', 'name email');
         res.status(200).json(patients);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching patients', error: error.message });
@@ -32,7 +32,7 @@ const getAllPatients = async (req, res) => {
 
 const getUnOccupiedPatients = async (req, res) => {
     try {
-        const patients = await Patient.find({ isAssignedBed: false })
+        const patients = await Patient.find({ isAssignedBed: false, doctorAssigned: null })
         res.status(200).json(patients);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching patients', error: error.message });
