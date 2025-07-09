@@ -1,22 +1,27 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { Building2 } from 'lucide-react'; // Optional icon, use lucide or react-icons
+import { Building2, Plus, Layers, Loader2 } from 'lucide-react';
 
 const FloorForm = () => {
   const [floorNumber, setFloorNumber] = useState('');
   const [floors, setFloors] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchFloors = async () => {
+    setIsLoading(true);
     try {
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/user/getAllFloors`, {
+      // Using fetch instead of axios for compatibility
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/getAllFloors`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      setFloors(res.data.floors || []);
+      const data = await response.json();
+      setFloors(data.floors || []);
     } catch (error) {
       console.error('Error fetching floors:', error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -26,74 +31,148 @@ const FloorForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!floorNumber.trim()) {
+      // Using console.log instead of toast for compatibility
+      console.log('Please enter a floor number');
+      return;
+    }
+    
+    setIsSubmitting(true);
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/admin/createFloor`,
-        { floorNumber },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
-      if (res.status === 201) {
-        toast.success(res.data.message);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/admin/createFloor`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ floorNumber }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.status === 201) {
+        console.log(data.message);
         setFloorNumber('');
-        fetchFloors(); // Refresh list after successful creation
+        fetchFloors();
       }
     } catch (error) {
-      if (error.response?.status === 400) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error(error.response?.data?.message || 'Error creating floor');
-      }
+      console.error(error.message || 'Error creating floor');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-10">
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center space-x-3">
+          <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl shadow-lg">
+            <Building2 className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Floor Management
+          </h1>
+        </div>
+        <p className="text-gray-600">Create and manage building floors</p>
+      </div>
+
       {/* Create Form */}
-      <div className="bg-white p-6 shadow-md rounded-lg border border-gray-200">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">➕ Create Floor</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Enter floor number (e.g., 1, 2, G)"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            value={floorNumber}
-            onChange={(e) => setFloorNumber(e.target.value)}
-          />
+      <div className="bg-white/80 backdrop-blur-lg p-8 shadow-xl rounded-2xl border border-white/20">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg">
+            <Plus className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800">Create New Floor</h3>
+        </div>
+        
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Floor Number</label>
+            <input
+              type="text"
+              placeholder="Enter floor number (e.g., 1, 2, G, B1)"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white/50 backdrop-blur-sm hover:bg-white/70"
+              value={floorNumber}
+              onChange={(e) => setFloorNumber(e.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+          
           <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 transition text-white px-6 py-2 rounded-md font-medium"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !floorNumber.trim()}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none flex items-center justify-center space-x-2"
           >
-            Create Floor
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Creating Floor...</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-5 h-5" />
+                <span>Create Floor</span>
+              </>
+            )}
           </button>
-        </form>
+        </div>
       </div>
 
       {/* List of Floors */}
-      <div className="bg-white p-6 shadow-md rounded-lg border border-gray-200">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">🏢 All Floors</h3>
-        {floors.length === 0 ? (
-          <p className="text-gray-500">No floors added yet.</p>
+      <div className="bg-white/80 backdrop-blur-lg p-8 shadow-xl rounded-2xl border border-white/20">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-2 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg">
+            <Layers className="w-5 h-5 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-gray-800">All Floors</h3>
+          <div className="ml-auto">
+            <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+              {floors.length} Floor{floors.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <span className="ml-3 text-gray-600">Loading floors...</span>
+          </div>
+        ) : floors.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="p-4 bg-gradient-to-r from-gray-100 to-blue-50 rounded-xl inline-block mb-4">
+              <Building2 className="w-12 h-12 text-gray-400 mx-auto" />
+            </div>
+            <p className="text-gray-500 text-lg">No floors added yet.</p>
+            <p className="text-gray-400 text-sm mt-2">Create your first floor using the form above.</p>
+          </div>
         ) : (
-          <ul className="grid gap-4">
-            {floors.map((floor) => (
-              <li
+          <div className="grid gap-4">
+            {floors.map((floor, index) => (
+              <div
                 key={floor._id}
-                className="flex items-center gap-4 border p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
+                className="group flex items-center gap-4 border border-gray-200 p-6 rounded-xl bg-gradient-to-r from-gray-50 to-blue-50 hover:from-blue-50 hover:to-purple-50 transition-all duration-200 hover:shadow-lg hover:border-blue-300 transform hover:scale-105"
               >
-                <Building2 className="text-blue-600 w-6 h-6" />
-                <div>
-                  <p className="text-lg font-semibold text-gray-800">
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-200">
+                  <Building2 className="text-white w-6 h-6" />
+                </div>
+                
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-gray-800 mb-1">
                     Floor {floor.floorNumber}
                   </p>
-                  <p className="text-sm text-gray-500">{floor.description || 'No description'}</p>
+                  <p className="text-sm text-gray-500">
+                    {floor.description || 'No description available'}
+                  </p>
                 </div>
-              </li>
+                
+                <div className="text-right">
+                  <div className="text-xs text-gray-400 mb-1">Floor #{index + 1}</div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         )}
       </div>
     </div>
