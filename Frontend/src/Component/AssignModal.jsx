@@ -1,42 +1,71 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const AssignModal = ({ isOpen, onClose, bed, patients, selectedPatient, onSelectPatient, onAssign }) => {
+const AssignModal = ({
+  isOpen,
+  onClose,
+  bed,
+  patients,
+  selectedPatient,
+  onSelectPatient,
+  onAssign,
+}) => {
   if (!isOpen || !bed) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-md w-[90%] max-w-md space-y-4">
-        <h2 className="text-xl font-bold text-blue-700">Assign Bed: {bed.bedNumber}</h2>
+  // Optional: close on ESC key
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
 
-        <div className="text-gray-600 text-sm">
-          <p><strong>Room:</strong> {bed.roomId.roomNumber}</p>
-          <p><strong>Room Type:</strong> {bed.roomId.type}</p>
-          <p><strong>Floor:</strong> {bed.roomId.floorId.floorNumber}</p>
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm animate-fade-in"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div className="bg-white w-[90%] max-w-md rounded-xl shadow-lg p-6 space-y-5">
+        <h2 className="text-xl font-bold text-blue-700">Assign Bed #{bed.bedNumber}</h2>
+
+        <div className="text-sm text-gray-600 space-y-1">
+          <p><strong>Room:</strong> {bed.roomId?.roomNumber}</p>
+          <p><strong>Type:</strong> {bed.roomId?.type}</p>
+          <p><strong>Floor:</strong> {bed.roomId?.floorId?.floorNumber}</p>
         </div>
 
-        <select
-          className="w-full border p-2 rounded"
-          value={selectedPatient}
-          onChange={(e) => onSelectPatient(e.target.value)}
-        >
-          <option value="">Select Patient</option>
-          {patients.map((p) => (
-            <option key={p._id} value={p._id}>
-              {p.name} Age: {p.age} Phone No: {p.contactNumber}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Select Patient:</label>
+          <select
+            className="w-full border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedPatient}
+            onChange={(e) => onSelectPatient(e.target.value)}
+          >
+            <option value="">-- Choose Patient --</option>
+            {patients.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.name} — Age: {p.age}, 📞 {p.contactNumber}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pt-2">
           <button
-            className="px-4 py-2 text-sm rounded bg-gray-300 hover:bg-gray-400"
             onClick={onClose}
+            className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 transition"
           >
             Cancel
           </button>
           <button
-            className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700"
             onClick={onAssign}
+            disabled={!selectedPatient}
+            className={`px-4 py-2 rounded-md text-white transition
+              ${selectedPatient
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-green-300 cursor-not-allowed'}
+            `}
           >
             Confirm Assignment
           </button>
