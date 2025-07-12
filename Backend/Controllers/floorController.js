@@ -31,6 +31,8 @@ const getAllFloors = async (req, res) => {
 }
 
 
+
+
 module.exports = {
     createFloor,
     getAllFloors

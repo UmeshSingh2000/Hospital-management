@@ -1,8 +1,8 @@
 const express = require('express');
 const AuthenticateToken = require('../Middlewares/AuthenticateToken');
 const { getAllFloors } = require('../Controllers/floorController');
-const { getAllRooms } = require('../Controllers/roomController');
-const { getAllBeds, getAvailableBeds, getOccupiedBeds, assignedBedToPatient, clearBed } = require('../Controllers/bedController');
+const { getAllRooms, getAllRoomsByFloor } = require('../Controllers/roomController');
+const { getAllBeds, getAvailableBeds, getOccupiedBeds, assignedBedToPatient, clearBed, getBedByRoom } = require('../Controllers/bedController');
 const { createNewPatient, getAllPatients, getUnOccupiedPatients, assigDoctorToPatient } = require('../Controllers/patientController');
 const { getDoctors } = require('../Controllers/userController');
 const router = express.Router();
@@ -10,7 +10,9 @@ const router = express.Router();
 
 router.get('/getAllFloors',AuthenticateToken,getAllFloors);
 router.get('/getAllRooms',AuthenticateToken,getAllRooms);
+router.get('/getAllRoomsByFloor/:floorId', AuthenticateToken, getAllRoomsByFloor);
 router.get('/getAllBeds',AuthenticateToken,getAllBeds);
+router.get('/getBedByRoom/:roomId', AuthenticateToken, getBedByRoom);
 router.get('/getAvailableBeds',AuthenticateToken,getAvailableBeds)
 router.get('/getOccupiedBeds',AuthenticateToken,getOccupiedBeds)
 

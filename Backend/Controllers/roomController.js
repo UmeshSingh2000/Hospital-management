@@ -36,6 +36,16 @@ const getAllRooms = async (req, res) => {
     }
 };
 
+const getAllRoomsByFloor = async (req, res) => {
+    try {
+        const { floorId } = req.params;
+        const rooms = await Room.find({ floorId }).populate('floorId', 'floorNumber');
+        res.status(200).json({ rooms });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching rooms for the floor', error: error.message });
+    }
+};
+
 // Get a single room by ID
 const getRoomById = async (req, res) => {
     try {
@@ -104,5 +114,6 @@ module.exports = {
     getRoomById,
     updateRoom,
     deleteRoom,
-    getAvailableRooms
+    getAvailableRooms,
+    getAllRoomsByFloor
 };

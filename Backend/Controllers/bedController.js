@@ -68,6 +68,29 @@ const getAllBeds = async (req, res) => {
   }
 };
 
+const getBedByRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    
+    const beds = await Bed.find({ roomId })
+      .populate('patientId', 'name age gender') // select fields you want
+      .populate('occupancyHistory.patient', 'name age gender');
+
+    if (!beds || beds.length === 0) {
+      return res.status(404).json({ message: 'No beds found for this room.' });
+    }
+
+    res.status(200).json(beds);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching beds for the room',
+      error: error.message
+    });
+  }
+};
+
+
+
 const getAvailableBeds = async (req, res) => {
   try {
     const beds = await Bed.find({ isOccupied: false }).populate({
@@ -205,5 +228,6 @@ module.exports = {
   getAvailableBeds,
   getOccupiedBeds,
   assignedBedToPatient,
-  clearBed
+  clearBed,
+  getBedByRoom
 };
